@@ -17,7 +17,14 @@ before_install:
   - govendor sync
 after_success:
   - make ci
-  - ghr --username prudhvitella --token $GITHUB_TOKEN --delete --prerelease --debug pre-release dist/
+  - ghr --username lyona --token $GITHUB_TOKEN --delete --prerelease --debug pre-release dist/
 branches:
   only:
     - master
+deploy:
+  provider: releases
+  api_key: O4nMc3vxV2Smj5jSYEOd4Q
+  file: "/bin/**"
+  skip_cleanup: true
+  on:
+    tags: true
