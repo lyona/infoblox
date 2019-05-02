@@ -9,16 +9,16 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func infobloxRecordA() *schema.Resource {
+func infobloxARecord() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceInfobloxRecordACreate,
-		Read:   resourceInfobloxRecordARead,
-		Update: resourceInfobloxRecordAUpdate,
-		Delete: resourceInfobloxRecordADelete,
+		Create: resourceInfobloxARecordCreate,
+		Read:   resourceInfobloxARecordRead,
+		Update: resourceInfobloxARecordUpdate,
+		Delete: resourceInfobloxARecordDelete,
 
 		Schema: map[string]*schema.Schema{
 			// TODO: validate that address is in IPv4 format.
-			"address": &schema.Schema{
+			"ipv4addr": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -45,15 +45,15 @@ func infobloxRecordA() *schema.Resource {
 	}
 }
 
-// objectaFromAttributes created an infoblox.RecordAObject using the attributes
+// aObjectFromAttributes created an infoblox.RecordAObject using the attributes
 // as set by terraform.
 // The Infoblox WAPI does not allow updates to the "view" field on an A record,
 // so we also take a skipView arg to skip setting view.
-func objectaFromAttributes(d *schema.ResourceData, skipView bool) infoblox.RecordAObject {
+func aObjectFromAttributes(d *schema.ResourceData, skipView bool) infoblox.RecordAObject {
 	aObject := infoblox.RecordAObject{}
 
 	aObject.Name = d.Get("name").(string)
-	aObject.Ipv4Addr = d.Get("address").(string)
+	aObject.Ipv4Addr = d.Get("ipv4addr").(string)
 
 	if attr, ok := d.GetOk("comment"); ok {
 		aObject.Comment = attr.(string)
@@ -72,11 +72,11 @@ func objectaFromAttributes(d *schema.ResourceData, skipView bool) infoblox.Recor
 	return aObject
 }
 
-func resourceInfobloxRecordACreate(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxARecordCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	record := url.Values{}
-	aRecordObject := objectaFromAttributes(d, false)
+	aRecordObject := aObjectFromAttributes(d, false)
 
 	log.Printf("[DEBUG] Creating Infoblox A record with configuration: %#v", aRecordObject)
 
@@ -94,7 +94,7 @@ func resourceInfobloxRecordACreate(d *schema.ResourceData, meta interface{}) err
 	return resourceInfobloxARecordRead(d, meta)
 }
 
-func resourceInfobloxRecordARead(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxARecordRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
@@ -105,7 +105,7 @@ func resourceInfobloxRecordARead(d *schema.ResourceData, meta interface{}) error
 		return handleReadError(d, "A", err)
 	}
 
-	d.Set("address", record.Ipv4Addr)
+	d.Set("ipv4addr", record.Ipv4Addr)
 	d.Set("name", record.Name)
 	d.Set("comment", record.Comment)
 	d.Set("ttl", record.Ttl)
@@ -114,7 +114,7 @@ func resourceInfobloxRecordARead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceInfobloxRecordAUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxARecordUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
@@ -126,7 +126,7 @@ func resourceInfobloxRecordAUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	record := url.Values{}
-	aRecordObject := objectaFromAttributes(d, true)
+	aRecordObject := aObjectFromAttributes(d, true)
 
 	log.Printf("[DEBUG] Updating Infoblox A record with configuration: %#v", record)
 
@@ -138,10 +138,10 @@ func resourceInfobloxRecordAUpdate(d *schema.ResourceData, meta interface{}) err
 	d.SetId(recordID)
 	log.Printf("[INFO] Infoblox A record updated with ID: %s", d.Id())
 
-	return resourceInfobloxRecordARead(d, meta)
+	return resourceInfobloxARecordRead(d, meta)
 }
 
-func resourceInfobloxRecordADelete(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxARecordDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	log.Printf("[DEBUG] Deleting Infoblox A record: %s, %s", d.Get("name").(string), d.Id())

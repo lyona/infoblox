@@ -21,7 +21,7 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("INFOBLOX_PASSWORD", nil),
 				Description: "Infoblox User Password",
 			},
-			"host": &schema.Schema{
+			"server": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("INFOBLOX_HOST", nil),
@@ -42,9 +42,9 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"infoblox_record": resourceInfobloxRecord(),
-			"infoblox_ip":     resourceInfobloxIP(),
-
+			"infoblox_record":       resourceInfobloxRecord(),
+			"infoblox_ip":           resourceInfobloxIP(),
+			"infoblox_arecord":      infobloxARecord(),
 			"infoblox_record_a":     infobloxRecordA(),
 			"infoblox_record_aaaa":  infobloxRecordAAAA(),
 			"infoblox_record_cname": infobloxRecordCNAME(),
@@ -63,7 +63,7 @@ func provideConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
 		Username:   d.Get("username").(string),
 		Password:   d.Get("password").(string),
-		Host:       d.Get("host").(string),
+		Host:       d.Get("server").(string),
 		SSLVerify:  d.Get("sslverify").(bool),
 		UseCookies: d.Get("usecookies").(bool),
 	}
