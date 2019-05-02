@@ -18,7 +18,7 @@ func infobloxARecord() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// TODO: validate that address is in IPv4 format.
-			"ipv4addr": &schema.Schema{
+			"address": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -53,7 +53,7 @@ func aObjectFromAttributes(d *schema.ResourceData, skipView bool) infoblox.Recor
 	aObject := infoblox.RecordAObject{}
 
 	aObject.Name = d.Get("name").(string)
-	aObject.Ipv4Addr = d.Get("ipv4addr").(string)
+	aObject.Ipv4Addr = d.Get("address").(string)
 
 	if attr, ok := d.GetOk("comment"); ok {
 		aObject.Comment = attr.(string)
@@ -105,7 +105,7 @@ func resourceInfobloxARecordRead(d *schema.ResourceData, meta interface{}) error
 		return handleReadError(d, "A", err)
 	}
 
-	d.Set("ipv4addr", record.Ipv4Addr)
+	d.Set("address", record.Ipv4Addr)
 	d.Set("name", record.Name)
 	d.Set("comment", record.Comment)
 	d.Set("ttl", record.Ttl)
