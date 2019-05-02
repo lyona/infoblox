@@ -11,14 +11,14 @@ import (
 
 func infobloxARecord() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceInfobloxARecordCreate,
-		Read:   resourceInfobloxARecordRead,
-		Update: resourceInfobloxARecordUpdate,
-		Delete: resourceInfobloxARecordDelete,
+		Create: resourceInfobloxAoldRecordCreate,
+		Read:   resourceInfobloxAoldRecordRead,
+		Update: resourceInfobloxAoldRecordUpdate,
+		Delete: resourceInfobloxAoldRecordDelete,
 
 		Schema: map[string]*schema.Schema{
 			// TODO: validate that address is in IPv4 format.
-			"address": &schema.Schema{
+			"ipv4addr": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -45,15 +45,15 @@ func infobloxARecord() *schema.Resource {
 	}
 }
 
-// aObjectFromAttributes created an infoblox.RecordAObject using the attributes
+// aObjectFromAttributesOld created an infoblox.RecordAObject using the attributes
 // as set by terraform.
 // The Infoblox WAPI does not allow updates to the "view" field on an A record,
 // so we also take a skipView arg to skip setting view.
-func aObjectFromAttributes(d *schema.ResourceData, skipView bool) infoblox.RecordAObject {
+func aObjectFromAttributesOld(d *schema.ResourceData, skipView bool) infoblox.RecordAObject {
 	aObject := infoblox.RecordAObject{}
 
 	aObject.Name = d.Get("name").(string)
-	aObject.Ipv4Addr = d.Get("address").(string)
+	aObject.Ipv4Addr = d.Get("ipv4addr").(string)
 
 	if attr, ok := d.GetOk("comment"); ok {
 		aObject.Comment = attr.(string)
@@ -72,11 +72,11 @@ func aObjectFromAttributes(d *schema.ResourceData, skipView bool) infoblox.Recor
 	return aObject
 }
 
-func resourceInfobloxARecordCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxAoldRecordCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	record := url.Values{}
-	aRecordObject := aObjectFromAttributes(d, false)
+	aRecordObject := aObjectFromAttributesOld(d, false)
 
 	log.Printf("[DEBUG] Creating Infoblox A record with configuration: %#v", aRecordObject)
 
@@ -91,10 +91,10 @@ func resourceInfobloxARecordCreate(d *schema.ResourceData, meta interface{}) err
 	d.SetId(recordID)
 	log.Printf("[INFO] Infoblox A record created with ID: %s", d.Id())
 
-	return resourceInfobloxARecordRead(d, meta)
+	return resourceInfobloxAoldRecordRead(d, meta)
 }
 
-func resourceInfobloxARecordRead(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxAoldRecordRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
@@ -114,7 +114,7 @@ func resourceInfobloxARecordRead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceInfobloxARecordUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxAoldRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
@@ -126,7 +126,7 @@ func resourceInfobloxARecordUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	record := url.Values{}
-	aRecordObject := aObjectFromAttributes(d, true)
+	aRecordObject := aObjectFromAttributesOld(d, true)
 
 	log.Printf("[DEBUG] Updating Infoblox A record with configuration: %#v", record)
 
@@ -138,10 +138,10 @@ func resourceInfobloxARecordUpdate(d *schema.ResourceData, meta interface{}) err
 	d.SetId(recordID)
 	log.Printf("[INFO] Infoblox A record updated with ID: %s", d.Id())
 
-	return resourceInfobloxARecordRead(d, meta)
+	return resourceInfobloxAoldRecordRead(d, meta)
 }
 
-func resourceInfobloxARecordDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceInfobloxAoldRecordDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*infoblox.Client)
 
 	log.Printf("[DEBUG] Deleting Infoblox A record: %s, %s", d.Get("name").(string), d.Id())
