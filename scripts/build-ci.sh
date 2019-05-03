@@ -22,6 +22,9 @@ gox \
 		        ./...
 
 # Done!
+
+cp dist/darwin_amd64_infoblox dist/terraform-provider-infoblox
+
 echo
 echo "==> Results:"
 ls -hl dist/*
